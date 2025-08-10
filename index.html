@@ -960,6 +960,22 @@
            </div>`;
       }
 
+      // Map a score in [min,max] to a hue from red (0) to green (120)
+      function hueForScore(score, min, max) {
+        const span = Math.max(1e-6, max - min);
+        const t = Math.max(0, Math.min(1, (score - min) / span));
+        return Math.round(120 * t); // 0 = red, 120 = green
+      }
+      
+      function applyTileColor(el, hue) {
+        el.style.background = `linear-gradient(
+          180deg,
+          hsla(${hue}, 70%, 28%, 0.92),
+          hsla(${hue}, 70%, 20%, 0.92)
+        )`;
+        el.style.borderColor = `hsla(${hue}, 70%, 45%, 0.45)`;
+      }
+
 
       function placeSuggest() {
         const rect = champInput.getBoundingClientRect();
@@ -1095,16 +1111,12 @@
         t.className = "tile";
         t.onclick = onClick;
         t.innerHTML =
-          `<h4>${aug.name}${
-            aug.removed ? " <span class='danger'>(Removed)</span>" : ""
-          }</h4>` +
+          `<h4>${aug.name}${aug.removed ? " <span class='danger'>(Removed)</span>" : ""}</h4>` +
           `<p>${aug.description || ""}</p>` +
           (meta
-            ? `<p class='hint'>score ${meta.score.toFixed(
+            ? `<p class='hint'>score ${meta.score.toFixed(2)} • champ +${meta.champ.toFixed(
                 2
-              )} • champ +${meta.champ.toFixed(2)} • syn +${meta.syn.toFixed(
-                2
-              )}</p>`
+              )} • syn +${meta.syn.toFixed(2)}</p>`
             : "");
         return t;
       }
@@ -1121,13 +1133,14 @@
       
       function renderAugList() {
         if (!currentChamp || !CHAMPS[currentChamp]) {
-          augGrid.innerHTML =
-            `<div class="tile"><h4>Select a champion</h4>
-              <p>Type a name above to see prioritized augments.</p></div>`;
+          augGrid.innerHTML = `<div class="tile"><h4>Select a champion</h4>
+            <p>Type a name above to see prioritized augments.</p></div>`;
           return;
         }
+      
         const q = search.value.trim().toLowerCase();
         const ranked = rankedPool(currentChamp, picks, AUGMENTS);
+      
         const filtered = ranked.filter((r) => {
           const a = r.aug;
           if (!q) return true;
@@ -1137,10 +1150,18 @@
             (a.tags || []).join(" ").toLowerCase().includes(q)
           );
         });
+      
+        const scores = filtered.map((r) => r.score);
+        const minScore = scores.length ? Math.min(...scores) : 0;
+        const maxScore = scores.length ? Math.max(...scores) : 1;
+      
         augGrid.innerHTML = "";
-        filtered.forEach((r) =>
-          augGrid.appendChild(makeTile(r.aug, () => pick(r.aug), r))
-        );
+        filtered.forEach((r) => {
+          const hue = hueForScore(r.score, minScore, maxScore);
+          const el = makeTile(r.aug, () => pick(r.aug), r);
+          applyTileColor(el, hue);
+          augGrid.appendChild(el);
+        });
       }
       
       
