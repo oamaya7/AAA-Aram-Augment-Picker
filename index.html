@@ -156,6 +156,24 @@
         backdrop-filter: blur(12px) saturate(130%);
         box-shadow: 0 20px 60px rgba(0, 0, 0, 0.35);
         margin-bottom: 14px;
+        overflow: visible;
+      }
+          /* Champion header blocks (prevents overlap) */
+      #champInfo .line {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        flex-wrap: nowrap;
+      }
+      #champInfo .summary {
+        color: var(--muted);
+        margin-top: 6px;
+      }
+      #champInfo .tags {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        margin-top: 6px;
       }
       .panel h2 {
         font-size: 16px;
@@ -203,7 +221,7 @@
         top: calc(100% + 6px);
         left: 0;
         right: 0;
-        z-index: 20;
+        z-index: 10000;
         background: rgba(18, 22, 32, 0.98);
         border: 1px solid var(--stroke);
         border-radius: 12px;
