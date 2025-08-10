@@ -389,11 +389,6 @@
         <div id="augGrid" class="grid"></div>
       </section>
 
-      <section class="panel">
-        <h2>Recommended Next Picks</h2>
-        <div id="recs" class="grid"></div>
-      </section>
-
       <details class="panel">
         <summary>Data Manager (import/export augments • champions)</summary>
 
@@ -930,7 +925,6 @@
       const champInfo = document.getElementById("champInfo");
       const picked = document.getElementById("picked");
       const augGrid = document.getElementById("augGrid");
-      const recs = document.getElementById("recs");
       const search = document.getElementById("search");
       const txtAug = document.getElementById("txtAug");
       const txtChamp = document.getElementById("txtChamp");
@@ -1149,23 +1143,11 @@
         );
       }
       
-      function renderRecs() {
-        if (!currentChamp || !CHAMPS[currentChamp]) {
-          recs.innerHTML = "";
-          return;
-        }
-        const list = rankedPool(currentChamp, picks, AUGMENTS).slice(0, 8);
-        recs.innerHTML = "";
-        list.forEach((r) =>
-          recs.appendChild(makeTile(r.aug, () => pick(r.aug), r))
-        );
-      }
       
       function renderAll() {
         renderChampInfo();
         renderPicked();
         renderAugList();
-        renderRecs();
       }
       function pick(aug) {
         if (picks.length >= 5) return;
