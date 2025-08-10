@@ -575,7 +575,21 @@
 
         { name: "Virtuous Cycle", description: "Assist/chain interaction (fixed 6.2c).", tags: ["utility"], patch: "6.2c" },
 
+        { name: "Mighty Shield", description: "Gaining a shield grants bonus Move Speed for a short time (Empowered: longer duration, higher MS). See in-game codex.", tags: ["shield","mobility","survivability","support"], patch: "6.1c" },
+        { name: "Starburst Haste", description: "Triggering the effect grants a burst of Movement Speed. See in-game codex.", tags: ["mobility","ms_scaling"], patch: "6.1c" },
+        { name: "Defend and Control", description: "Gain Armor and Magic Resist; also weakens enemy damage (Empowered: debuff lasts longer). See in-game codex.", tags: ["survivability","utility","tank"], patch: "6.1c" },
+        { name: "Escape Artist", description: "Greatly lowers the cooldown on your escape/evade trigger. See in-game codex.", tags: ["mobility","survivability"], patch: "6.1c" },
+        { name: "Lifeline Master", description: "Reduces the cooldown of Lifeline-type shields from items. See in-game codex.", tags: ["shield","item_synergy","survivability"], patch: "6.1c" },
+        { name: "Full Steam Ahead", description: "Gain ramping Movement Speed over time while moving. See in-game codex.", tags: ["mobility","ms_scaling"], patch: "6.1c" },
+        { name: "Wind Beneath Blade", description: "Gain Movement Speed based on your flat penetration. See in-game codex.", tags: ["ms_scaling","amp","mobility"], patch: "6.1c" },
+        { name: "Be Magical", description: "Converts a portion of your bonus AD into Ability Power. See in-game codex.", tags: ["hybrid","amp","scaling"], patch: "6.1c" },
+        { name: "Power of Resistance", description: "Per 100 bonus resists: gain Move Speed, Attack Speed, and on-hit true damage. See in-game codex.", tags: ["tank","attack_speed","onhit","survivability"], patch: "6.1c" },
+        { name: "Recursion", description: "Ability on-hit stacks toward a special Drake Soul reward (Empowered needs fewer stacks). See in-game codex.", tags: ["stacking","objective","aoe"], patch: "6.1c" },
+        { name: "Gift of Light", description: "Fires a light-based damage effect in an area. See in-game codex.", tags: ["poke","aoe"], patch: "6.1c" },
+        { name: "Jeweled Gauntlet", description: "Gain Critical Chance that scales with Ability Power. See in-game codex.", tags: ["crit","mage","amp"], patch: "6.1c" },
+
         { name: "Ice Cold", description: "Removed in 6.2c.", tags: ["removed"], patch: "6.2c", removed: true }
+        
       ];
 
       // ---------------- Champion roster + accurate weight model ----------------
@@ -678,6 +692,7 @@
         ["Jhin", ["marksman"]],
         ["Jinx", ["marksman"]],
         ["Kai'Sa", ["marksman"]],
+        ["Kalista", ["marksman"]],
         ["Karma", ["support", "mage"]],
         ["Kassadin", ["assassin", "mage"]],
         ["Katarina", ["assassin"]],
@@ -689,6 +704,7 @@
         ["Lee Sin", ["fighter", "assassin"]],
         ["Leona", ["tank", "support"]],
         ["Lillia", ["fighter", "mage"]],
+        ["Lissandra", ["mage", "assassin"]],
         ["Lucian", ["marksman"]],
         ["Lulu", ["support"]],
         ["Lux", ["mage", "support"]],
@@ -778,6 +794,7 @@
         "Ezreal": ["projectileMage", "onHitScaling", "mobilityDash"],
         "Vayne": ["onHitScaling", "mobilityDash"],
         "Kai'Sa": ["onHitScaling", "mobilityDash"],
+        "Kalista": ["onHitScaling", "mobilityDash"],
         "Jinx": ["onHitScaling"],
         "Katarina": ["mobilityDash", "ultCarry"],
         "Zed": ["mobilityDash", "ultCarry"],
@@ -805,6 +822,7 @@
         "Yone": ["onHitScaling", "mobilityDash"],
         "Rammus": ["hardCC"],
         "Singed": ["selfSustain"],
+        "Lissandra": ["projectileMage", "hardCC", "mobilityDash", "ultCarry"],
         "Swain": ["aoePoke", "selfSustain"]
       };
 
@@ -817,6 +835,7 @@
         Veigar: { cdr_projectile: 3, ult_haste: 3, cc_cdr: 2, burn: 2 },
         Amumu: { cc_cdr: 3, ult_haste: 2, survivability: 2, shield: 1 },
         Leona: { cc_cdr: 3, shield: 2, survivability: 2 },
+        Lissandra: { cc_cdr: 3, cdr_projectile: 2, ult_haste: 2, cdr: 1, mobility: 1, burn: 1},
         Malphite: { ult_haste: 3, survivability: 2, cc_cdr: 2 }
       };
 
