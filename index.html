@@ -217,9 +217,10 @@
         position: relative;
       }
       .suggest {
-        position: absolute; /* was absolute */
-        top: 0; /* set dynamically in JS */
-        left: 0; /* set dynamically in JS */
+        position: fixed; /* detached from panel stacking contexts */
+        top: 0; /* set in JS */
+        left: 0; /* set in JS */
+        width: 280px; /* set in JS */
         z-index: 2147483647; /* always on top */
         background: rgba(18, 22, 32, 0.98);
         border: 1px solid var(--stroke);
@@ -949,9 +950,12 @@
 
       function placeSuggest() {
         const rect = champInput.getBoundingClientRect();
-        suggest.style.left = Math.round(rect.left + window.scrollX) + "px";
-        suggest.style.top = Math.round(rect.bottom + 6 + window.scrollY) + "px";
-        suggest.style.width = Math.round(rect.width) + "px";
+        // For position: fixed, use viewport coordinates (no scroll offsets)
+        suggest.style.left = Math.round(rect.left) + "px";
+        suggest.style.top = Math.round(rect.bottom + 6) + "px";
+        // Match the input width, but clamp so it never blows past the screen
+        const w = Math.max(220, Math.min(rect.width, Math.min(window.innerWidth - 24, 520)));
+        suggest.style.width = Math.round(w) + "px";
       }
 
       function showSuggestions(list, highlightIdx = 0) {
@@ -960,8 +964,7 @@
           suggest.style.display = "none";
           return;
         }
-        // Place the fixed overlay right under the input
-        placeSuggest();
+        placeSuggest(); // position before display
       
         list.forEach((name, idx) => {
           const div = document.createElement("div");
@@ -979,8 +982,27 @@
           };
           suggest.appendChild(div);
         });
+      
         suggest.style.display = "block";
       }
+      
+      // Keep dropdown aligned on scroll/resize/orientation while visible
+      ["scroll", "resize", "orientationchange"].forEach((evt) => {
+        window.addEventListener(
+          evt,
+          () => {
+            if (suggest.style.display === "block") placeSuggest();
+          },
+          { passive: true, capture: true }
+        );
+      });
+      
+      // Hide when clicking outside
+      document.addEventListener("click", (e) => {
+        if (!suggest.contains(e.target) && e.target !== champInput) {
+          suggest.style.display = "none";
+        }
+      });
       
       // Reposition dropdown on scroll/resize while it’s open
       ["scroll", "resize", "orientationchange"].forEach((evt) => {
@@ -1217,6 +1239,7 @@
       // ---------------- Boot ----------------
       (async function init() {
         await ensureDDragon(); // icons
+        document.body.appendChild(suggest);
         txtAug.value = JSON.stringify(AUGMENTS, null, 2);
         txtChamp.value = JSON.stringify(CHAMPS, null, 2);
         renderAll();
