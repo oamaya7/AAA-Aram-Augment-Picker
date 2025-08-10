@@ -902,7 +902,7 @@
       let CHAMPS = loadJson(LS_CHAMP, DEFAULT_CHAMPIONS);
 
       // ---------------- State ----------------
-      let currentChamp = "Aurora";
+      let currentChamp = null;
       if (!CHAMPS[currentChamp]) currentChamp = Object.keys(CHAMPS)[0];
       let picks = [];
 
@@ -924,22 +924,28 @@
       }
 
       function renderChampInfo() {
+        if (!currentChamp || !CHAMPS[currentChamp]) {
+          champInfo.innerHTML =
+            "<span class='hint'>Pick a champion above to start.</span>";
+          return;
+        }
         const info = CHAMPS[currentChamp];
         const weights = info.weights || {};
         const tops = Object.entries(weights)
           .sort((a, b) => b[1] - a[1])
           .slice(0, 6)
           .map((x) => x[0]);
+      
         champInfo.innerHTML =
-          `<span style="display:inline-flex;align-items:center;gap:10px">` +
-          `<img src="${championIconUrl(
-            currentChamp
-          )}" alt="" class="icon" style="width:40px;height:40px"/>` +
-          `<strong>${currentChamp}</strong>` +
-          `</span><br/>${CHAMPS[currentChamp].summary}` +
-          `<div style="margin-top:6px">${tops
-            .map((t) => `<span class='chip'>${t}</span>`)
-            .join(" ")}</div>`;
+          `<div class="line">
+             <img src="${championIconUrl(currentChamp)}"
+                  alt="" class="icon" style="width:40px;height:40px"/>
+             <strong>${currentChamp}</strong>
+           </div>
+           <div class="summary">${info.summary || ""}</div>
+           <div class="tags">
+             ${tops.map((t) => `<span class="chip">${t}</span>`).join(" ")}
+           </div>`;
       }
 
       function showSuggestions(list, highlightIdx = 0) {
@@ -1058,6 +1064,12 @@
         });
       }
       function renderAugList() {
+        if (!currentChamp || !CHAMPS[currentChamp]) {
+          augGrid.innerHTML =
+            `<div class="tile"><h4>Select a champion</h4>
+              <p>Type a name above to see prioritized augments.</p></div>`;
+          return;
+        }
         const q = search.value.trim().toLowerCase();
         const ranked = rankedPool(currentChamp, picks, AUGMENTS);
         const filtered = ranked.filter((r) => {
@@ -1074,13 +1086,19 @@
           augGrid.appendChild(makeTile(r.aug, () => pick(r.aug), r))
         );
       }
+      
       function renderRecs() {
+        if (!currentChamp || !CHAMPS[currentChamp]) {
+          recs.innerHTML = "";
+          return;
+        }
         const list = rankedPool(currentChamp, picks, AUGMENTS).slice(0, 8);
         recs.innerHTML = "";
         list.forEach((r) =>
           recs.appendChild(makeTile(r.aug, () => pick(r.aug), r))
         );
       }
+      
       function renderAll() {
         renderChampInfo();
         renderPicked();
@@ -1180,7 +1198,6 @@
         await ensureDDragon(); // icons
         txtAug.value = JSON.stringify(AUGMENTS, null, 2);
         txtChamp.value = JSON.stringify(CHAMPS, null, 2);
-        champInput.value = currentChamp;
         renderAll();
       })();
     </script>
