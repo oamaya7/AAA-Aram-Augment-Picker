@@ -472,11 +472,16 @@
         }
       }
 
+      const DDRAGON_NAME_ALIASES = {
+        nunuwillump: "nunu"
+      };
+
       function championIconUrl(championName) {
         const override = CHAMP_ICON_OVERRIDES[championName];
         if (override) return override;
         const key = normName(championName);
-        const file = DDragon.byName.get(key);
+        const aliasKey = DDRAGON_NAME_ALIASES[key] || key;
+        const file = DDragon.byName.get(aliasKey);
         if (!file || !DDragon.version) return ICON_PLACEHOLDER;
         return `https://ddragon.leagueoflegends.com/cdn/${DDragon.version}/img/champion/${file}`;
       }
