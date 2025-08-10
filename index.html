@@ -217,11 +217,11 @@
         position: relative;
       }
       .suggest {
-        position: absolute;
-        top: calc(100% + 6px);
-        left: 0;
-        right: 0;
-        z-index: 10000;
+        position: fixed; /* was absolute */
+        top: 0; /* set dynamically in JS */
+        left: 0; /* set dynamically in JS */
+        width: 320px; /* set dynamically in JS */
+        z-index: 2147483647; /* always on top */
         background: rgba(18, 22, 32, 0.98);
         border: 1px solid var(--stroke);
         border-radius: 12px;
@@ -903,7 +903,6 @@
 
       // ---------------- State ----------------
       let currentChamp = null;
-      if (!CHAMPS[currentChamp]) currentChamp = Object.keys(CHAMPS)[0];
       let picks = [];
 
       // ---------------- DOM ----------------
@@ -926,7 +925,7 @@
       function renderChampInfo() {
         if (!currentChamp || !CHAMPS[currentChamp]) {
           champInfo.innerHTML =
-            "<span class='hint'>Pick a champion above to start.</span>";
+            "<span class='hint'>Pick a champion to start.</span>";
           return;
         }
         const info = CHAMPS[currentChamp];
@@ -948,12 +947,23 @@
            </div>`;
       }
 
+
+      function placeSuggest() {
+        const rect = champInput.getBoundingClientRect();
+        suggest.style.left = Math.round(rect.left + window.scrollX) + "px";
+        suggest.style.top = Math.round(rect.bottom + 6 + window.scrollY) + "px";
+        suggest.style.width = Math.round(rect.width) + "px";
+      }
+
       function showSuggestions(list, highlightIdx = 0) {
         suggest.innerHTML = "";
         if (!list.length) {
           suggest.style.display = "none";
           return;
         }
+        // Place the fixed overlay right under the input
+        placeSuggest();
+      
         list.forEach((name, idx) => {
           const div = document.createElement("div");
           div.className = "s-item" + (idx === highlightIdx ? " active" : "");
@@ -972,6 +982,17 @@
         });
         suggest.style.display = "block";
       }
+      
+      // Reposition dropdown on scroll/resize while it’s open
+      ["scroll", "resize", "orientationchange"].forEach((evt) => {
+        window.addEventListener(
+          evt,
+          () => {
+            if (suggest.style.display === "block") placeSuggest();
+          },
+          { passive: true, capture: true }
+        );
+      });
 
       function searchChampions(q) {
         const names = Object.keys(CHAMPS);
@@ -1063,6 +1084,7 @@
           picked.appendChild(c);
         });
       }
+      
       function renderAugList() {
         if (!currentChamp || !CHAMPS[currentChamp]) {
           augGrid.innerHTML =
