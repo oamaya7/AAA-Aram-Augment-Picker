@@ -158,7 +158,42 @@
         margin-bottom: 14px;
         overflow: visible;
       }
-          /* Champion header blocks (prevents overlap) */
+
+      /* Base tile transitions */
+      .tile {
+        transition:
+          transform 280ms cubic-bezier(0.2, 0.7, 0, 1),
+          opacity 240ms ease,
+          background 180ms ease,
+          border-color 180ms ease;
+        will-change: transform, opacity;
+      }
+      
+      /* Enter/exit micro‑states (applied by JS) */
+      .tile--enter {
+        opacity: 0;
+        transform: scale(0.98);
+      }
+      .tile--enter.tile--enter-active {
+        opacity: 1;
+        transform: scale(1);
+      }
+      
+      .tile--exit {
+        opacity: 1;
+        transform: scale(1);
+        pointer-events: none;
+      }
+      .tile--exit.tile--exit-active {
+        opacity: 0;
+        transform: scale(0.92) translateY(4px);
+      }
+      
+      /* Small number look for animated values */
+      .num {
+        font-variant-numeric: tabular-nums;
+      }
+      
       #champInfo .line {
         display: inline-flex;
         align-items: center;
@@ -960,20 +995,68 @@
            </div>`;
       }
 
-      // Map a score in [min,max] to a hue from red (0) to green (120)
+      // Color: map score in [min,max] to red(0) -> green(120)
       function hueForScore(score, min, max) {
         const span = Math.max(1e-6, max - min);
         const t = Math.max(0, Math.min(1, (score - min) / span));
-        return Math.round(120 * t); // 0 = red, 120 = green
+        return Math.round(120 * t);
       }
-      
       function applyTileColor(el, hue) {
         el.style.background = `linear-gradient(
           180deg,
-          hsla(${hue}, 70%, 28%, 0.92),
-          hsla(${hue}, 70%, 20%, 0.92)
+          hsla(${hue}, 70%, 26%, 0.94),
+          hsla(${hue}, 70%, 18%, 0.92)
         )`;
         el.style.borderColor = `hsla(${hue}, 70%, 45%, 0.45)`;
+      }
+      
+      // Number tweening for the score/champ/syn line
+      function tweenNumber(el, from, to, ms = 380) {
+        if (!el) return;
+        const start = performance.now();
+        const ease = (t) =>
+          t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+        function frame(now) {
+          const p = Math.min(1, (now - start) / ms);
+          const v = from + (to - from) * ease(p);
+          el.textContent = v.toFixed(2);
+          if (p < 1) requestAnimationFrame(frame);
+        }
+        requestAnimationFrame(frame);
+      }
+      
+      // FLIP: measure → render → invert → play
+      function capturePositions(container) {
+        const map = new Map();
+        Array.from(container.children).forEach((child) => {
+          const key = child.dataset.key;
+          if (!key) return;
+          map.set(key, child.getBoundingClientRect());
+        });
+        return map;
+      }
+      function playFlip(container, first) {
+        const last = new Map();
+        Array.from(container.children).forEach((child) => {
+          const key = child.dataset.key;
+          if (!key) return;
+          last.set(key, child.getBoundingClientRect());
+        });
+        Array.from(container.children).forEach((child) => {
+          const key = child.dataset.key;
+          const a = first.get(key);
+          const b = last.get(key);
+          if (!a || !b) return;
+          const dx = a.left - b.left;
+          const dy = a.top - b.top;
+          if (Math.abs(dx) < 0.5 && Math.abs(dy) < 0.5) return;
+      
+          child.style.transform = `translate(${dx}px, ${dy}px)`;
+          child.style.willChange = "transform";
+          // Force reflow
+          child.getBoundingClientRect();
+          child.style.transform = "translate(0, 0)";
+        });
       }
 
 
@@ -1108,16 +1191,29 @@
 
       function makeTile(aug, onClick, meta) {
         const t = document.createElement("div");
-        t.className = "tile";
+        t.className = "tile tile--enter";
+        t.dataset.key = aug.name; // key for FLIP
         t.onclick = onClick;
+      
+        const scoreLine = meta
+          ? `<p class="hint">
+               score <span class="num n-score">${meta.score.toFixed(
+                 2
+               )}</span> • champ +<span class="num n-champ">${meta.champ.toFixed(
+                 2
+               )}</span> • syn +<span class="num n-syn">${meta.syn.toFixed(2)}</span>
+             </p>`
+          : "";
+      
         t.innerHTML =
-          `<h4>${aug.name}${aug.removed ? " <span class='danger'>(Removed)</span>" : ""}</h4>` +
-          `<p>${aug.description || ""}</p>` +
-          (meta
-            ? `<p class='hint'>score ${meta.score.toFixed(2)} • champ +${meta.champ.toFixed(
-                2
-              )} • syn +${meta.syn.toFixed(2)}</p>`
-            : "");
+          `<h4>${aug.name}${
+            aug.removed ? " <span class='danger'>(Removed)</span>" : ""
+          }</h4>
+           <p>${aug.description || ""}</p>
+           ${scoreLine}`;
+      
+        // Enter animation
+        requestAnimationFrame(() => t.classList.add("tile--enter-active"));
         return t;
       }
 
@@ -1131,10 +1227,14 @@
         });
       }
       
+      // Keep last numeric values per tile to animate text changes
+      const LAST_NUMS = new Map(); // key -> { score, champ, syn }
+      
       function renderAugList() {
         if (!currentChamp || !CHAMPS[currentChamp]) {
           augGrid.innerHTML = `<div class="tile"><h4>Select a champion</h4>
             <p>Type a name above to see prioritized augments.</p></div>`;
+          LAST_NUMS.clear();
           return;
         }
       
@@ -1155,12 +1255,40 @@
         const minScore = scores.length ? Math.min(...scores) : 0;
         const maxScore = scores.length ? Math.max(...scores) : 1;
       
-        augGrid.innerHTML = "";
+        // FLIP: capture current layout before we rebuild
+        const first = capturePositions(augGrid);
+      
+        // Rebuild
+        const frag = document.createDocumentFragment();
         filtered.forEach((r) => {
-          const hue = hueForScore(r.score, minScore, maxScore);
           const el = makeTile(r.aug, () => pick(r.aug), r);
+          const hue = hueForScore(r.score, minScore, maxScore);
           applyTileColor(el, hue);
-          augGrid.appendChild(el);
+          frag.appendChild(el);
+        });
+        augGrid.innerHTML = "";
+        augGrid.appendChild(frag);
+      
+        // FLIP: animate items into their new places
+        playFlip(augGrid, first);
+      
+        // Animate the numbers to their new values
+        filtered.forEach((r) => {
+          const key = r.aug.name;
+          const node = augGrid.querySelector(`[data-key="${CSS.escape(key)}"]`);
+          if (!node) return;
+          const prev = LAST_NUMS.get(key) || {
+            score: r.score,
+            champ: r.champ,
+            syn: r.syn,
+          };
+          const ns = node.querySelector(".n-score");
+          const nc = node.querySelector(".n-champ");
+          const ny = node.querySelector(".n-syn");
+          tweenNumber(ns, prev.score, r.score, 420);
+          tweenNumber(nc, prev.champ, r.champ, 420);
+          tweenNumber(ny, prev.syn, r.syn, 420);
+          LAST_NUMS.set(key, { score: r.score, champ: r.champ, syn: r.syn });
         });
       }
       
@@ -1172,8 +1300,24 @@
       }
       function pick(aug) {
         if (picks.length >= 5) return;
-        picks.push(aug);
-        renderAll();
+      
+        // Find the tile to animate out
+        const key = aug.name;
+        const tile = augGrid.querySelector(`[data-key="${CSS.escape(key)}"]`);
+        if (tile) {
+          tile.classList.add("tile--exit");
+          // Force style and then activate the exit state
+          tile.getBoundingClientRect();
+          tile.classList.add("tile--exit-active");
+        }
+      
+        // After a short exit, commit the pick and re-render
+        setTimeout(() => {
+          picks.push(aug);
+          renderChampInfo();
+          renderPicked();
+          renderAugList(); // FLIP runs inside
+        }, 220); // matches CSS opacity timing
       }
 
       // ---------------- Controls ----------------
