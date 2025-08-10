@@ -1,0 +1,1165 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, viewport-fit=cover"
+    />
+    <title>ARAM Augment Advisor</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&display=swap"
+      rel="stylesheet"
+    />
+
+    <style>
+      :root {
+        --bg: #0b0d12;
+        --ink: #e9eefc;
+        --muted: #b6bed7;
+        --card: rgba(19, 23, 33, 0.6);
+        --stroke: rgba(255, 255, 255, 0.08);
+        --chip: rgba(28, 34, 48, 0.7);
+        --good: #3fe0b5;
+        --accent-a: #6ea8ff;
+        --accent-b: #b388ff;
+        --accent-c: #5ef0ff;
+        --danger: #ff8a8a;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        color: var(--ink);
+        font-family: "Plus Jakarta Sans", system-ui, -apple-system, Segoe UI,
+          Roboto, Arial, sans-serif;
+        background: radial-gradient(
+            1200px 800px at 10% -10%,
+            rgba(110, 168, 255, 0.25),
+            transparent
+          ),
+          radial-gradient(
+            900px 700px at 110% 10%,
+            rgba(179, 136, 255, 0.25),
+            transparent
+          ),
+          radial-gradient(
+            900px 700px at 50% 120%,
+            rgba(94, 240, 255, 0.18),
+            transparent
+          ),
+          #0b0d12;
+        background-attachment: fixed;
+      }
+      .shell {
+        max-width: 1100px;
+        margin: 0 auto;
+        padding: 16px;
+      }
+      header.hero {
+        position: sticky;
+        top: 0;
+        z-index: 10;
+        backdrop-filter: saturate(130%) blur(12px);
+        background: linear-gradient(
+            to bottom,
+            rgba(10, 12, 18, 0.9),
+            rgba(10, 12, 18, 0.6)
+          )
+          fixed;
+        border-bottom: 1px solid var(--stroke);
+      }
+      .hero-inner {
+        max-width: 1100px;
+        margin: 0 auto;
+        padding: 14px 16px;
+        display: grid;
+        grid-template-columns: 1fr auto;
+        gap: 12px;
+        align-items: center;
+      }
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+      .logo {
+        width: 38px;
+        height: 38px;
+        border-radius: 10px;
+        background: conic-gradient(
+          from 180deg,
+          var(--accent-a),
+          var(--accent-b),
+          var(--accent-c),
+          var(--accent-a)
+        );
+        box-shadow: 0 6px 30px rgba(110, 168, 255, 0.25);
+      }
+      h1 {
+        font-size: 20px;
+        font-weight: 700;
+        margin: 0;
+        letter-spacing: 0.2px;
+      }
+      .bar {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+        justify-content: flex-end;
+      }
+      .btn {
+        appearance: none;
+        border: 1px solid var(--stroke);
+        color: var(--ink);
+        background: linear-gradient(
+          180deg,
+          rgba(255, 255, 255, 0.06),
+          rgba(255, 255, 255, 0.02)
+        );
+        border-radius: 12px;
+        padding: 10px 14px;
+        font-weight: 600;
+        letter-spacing: 0.2px;
+        cursor: pointer;
+        min-height: 44px;
+      }
+      .btn:hover {
+        border-color: rgba(255, 255, 255, 0.16);
+      }
+      .btn.primary {
+        border: none;
+        background: linear-gradient(
+          135deg,
+          var(--accent-a),
+          var(--accent-b) 55%,
+          var(--accent-c)
+        );
+        box-shadow: 0 8px 36px rgba(110, 168, 255, 0.35);
+      }
+      .btn.warn {
+        border-color: rgba(255, 190, 70, 0.45);
+        background: linear-gradient(
+          180deg,
+          rgba(255, 180, 60, 0.18),
+          rgba(255, 140, 60, 0.1)
+        );
+      }
+      .panel {
+        background: var(--card);
+        border: 1px solid var(--stroke);
+        border-radius: 16px;
+        padding: 14px;
+        backdrop-filter: blur(12px) saturate(130%);
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.35);
+        margin-bottom: 14px;
+      }
+      .panel h2 {
+        font-size: 16px;
+        margin: 0 0 8px 0;
+        font-weight: 700;
+        letter-spacing: 0.2px;
+      }
+      .hint {
+        color: var(--muted);
+        font-size: 12px;
+      }
+      .row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+      .chip {
+        background: var(--chip);
+        border: 1px solid var(--stroke);
+        border-radius: 999px;
+        padding: 8px 12px;
+        font-size: 13px;
+        font-weight: 600;
+      }
+      .chip.sel {
+        background: rgba(46, 71, 120, 0.5);
+        border-color: rgba(118, 160, 255, 0.4);
+      }
+      input[type="search"] {
+        width: 100%;
+        padding: 12px 14px;
+        border-radius: 12px;
+        border: 1px solid var(--stroke);
+        background: rgba(17, 20, 30, 0.8);
+        color: var(--ink);
+        font-size: 15px;
+        outline: none;
+      }
+
+      .typeahead {
+        position: relative;
+      }
+      .suggest {
+        position: absolute;
+        top: calc(100% + 6px);
+        left: 0;
+        right: 0;
+        z-index: 20;
+        background: rgba(18, 22, 32, 0.98);
+        border: 1px solid var(--stroke);
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 18px 40px rgba(0, 0, 0, 0.35);
+        max-height: 60vh;
+        overflow-y: auto;
+      }
+      .s-item {
+        display: grid;
+        grid-template-columns: 36px 1fr auto;
+        gap: 10px;
+        align-items: center;
+        padding: 10px 12px;
+        cursor: pointer;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+      }
+      .s-item:last-child {
+        border-bottom: none;
+      }
+      .s-item:hover,
+      .s-item.active {
+        background: rgba(25, 31, 45, 0.9);
+      }
+      .icon {
+        width: 36px;
+        height: 36px;
+        border-radius: 8px;
+        background: linear-gradient(
+          135deg,
+          rgba(110, 168, 255, 0.35),
+          rgba(179, 136, 255, 0.25)
+        );
+        border: 1px solid var(--stroke);
+        object-fit: cover;
+      }
+      .name {
+        font-weight: 700;
+        font-size: 14px;
+      }
+      .roles {
+        font-size: 11px;
+        color: var(--muted);
+        text-align: right;
+      }
+
+      .grid {
+        display: grid;
+        gap: 10px;
+        grid-template-columns: repeat(2, 1fr);
+      }
+      @media (min-width: 640px) {
+        .grid {
+          grid-template-columns: repeat(3, 1fr);
+        }
+      }
+      @media (min-width: 960px) {
+        .grid {
+          grid-template-columns: repeat(4, 1fr);
+        }
+      }
+      .tile {
+        background: rgba(18, 22, 32, 0.6);
+        border: 1px solid var(--stroke);
+        border-radius: 14px;
+        padding: 12px;
+        cursor: pointer;
+        min-height: 96px;
+        transition: transform 160ms ease, background 160ms ease,
+          box-shadow 160ms ease;
+      }
+      .tile:hover {
+        transform: translateY(-2px);
+        background: rgba(20, 24, 34, 0.75);
+        box-shadow: 0 10px 26px rgba(110, 168, 255, 0.18);
+      }
+      .tile h4 {
+        margin: 0 0 6px 0;
+        font-size: 15px;
+      }
+      .tile p {
+        margin: 0;
+        color: var(--muted);
+        font-size: 12px;
+      }
+
+      details.panel summary {
+        cursor: pointer;
+        list-style: none;
+        font-weight: 700;
+        margin: 0 0 8px 0;
+      }
+      details.panel[open] summary {
+        margin-bottom: 12px;
+      }
+      textarea {
+        width: 100%;
+        min-height: 160px;
+        resize: vertical;
+        border-radius: 12px;
+        border: 1px solid var(--stroke);
+        background: rgba(17, 20, 30, 0.8);
+        color: var(--ink);
+        padding: 10px;
+        font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+        font-size: 13px;
+      }
+      .footer {
+        text-align: center;
+        color: var(--muted);
+        font-size: 12px;
+        padding: 16px 8px 26px;
+      }
+      .danger {
+        color: var(--danger);
+      }
+    </style>
+  </head>
+  <body>
+    <header class="hero">
+      <div class="hero-inner">
+        <div class="brand">
+          <div class="logo" aria-hidden="true"></div>
+          <h1>ARAM Augment Advisor</h1>
+        </div>
+        <div class="bar">
+          <button id="btnShare" class="btn">Share</button>
+          <button id="btnUndo" class="btn">Undo</button>
+          <button id="btnReset" class="btn warn">Reset</button>
+          <button id="btnData" class="btn primary">Data ▸</button>
+        </div>
+      </div>
+    </header>
+
+    <main class="shell">
+      <section class="panel">
+        <h2>Champion</h2>
+        <p class="hint" id="champInfo"></p>
+        <div class="typeahead" style="margin-top: 8px">
+          <input
+            id="champInput"
+            type="search"
+            placeholder="Type a champion name (e.g., Gwen, Lux, Aurora)..."
+            autocomplete="off"
+            spellcheck="false"
+          />
+          <div id="suggest" class="suggest" style="display: none"></div>
+        </div>
+      </section>
+
+      <section class="panel">
+        <h2>Your Picks (max 5)</h2>
+        <div id="picked" class="row"></div>
+      </section>
+
+      <section class="panel">
+        <h2>Select Augment</h2>
+        <p class="hint">
+          Auto‑sorted by the best next pick for this champion and your current
+          choices.
+        </p>
+        <div class="row" style="margin: 8px 0 10px">
+          <input id="search" type="search" placeholder="Search augments..." />
+        </div>
+        <div id="augGrid" class="grid"></div>
+      </section>
+
+      <section class="panel">
+        <h2>Recommended Next Picks</h2>
+        <div id="recs" class="grid"></div>
+      </section>
+
+      <details class="panel">
+        <summary>Data Manager (import/export augments • champions)</summary>
+
+        <div class="row" style="margin-bottom: 12px">
+          <button id="btnAugExport" class="btn">Export Augments</button>
+          <button id="btnAugImport" class="btn primary">Import Augments</button>
+          <button id="btnAugReset" class="btn warn">Reset Augments</button>
+        </div>
+        <textarea id="txtAug"></textarea>
+
+        <div class="row" style="margin: 12px 0 12px">
+          <button id="btnChampExport" class="btn">Export Champions</button>
+          <button id="btnChampImport" class="btn primary">
+            Import Champions
+          </button>
+          <button id="btnChampReset" class="btn warn">Reset Champions</button>
+        </div>
+        <textarea id="txtChamp"></textarea>
+
+        <p class="hint">
+          Icons load via Riot’s Data Dragon (latest version fetched at runtime).
+          For any champion missing a DDragon icon, add an override URL inside
+          CHAMP_ICON_OVERRIDES in this file.
+        </p>
+        <p class="hint">
+          Sources verified for 6.2/6.2c augments: Riot patch notes (July 16,
+          2025; Aug 8, 2025).
+        </p>
+      </details>
+
+      <div class="footer">
+        Built for AAA ARAM. Auto‑sorts best augments after every pick. Offline
+        support enabled.
+      </div>
+    </main>
+
+    <script>
+      // ---------------- Service Worker registration ----------------
+      if ("serviceWorker" in navigator) {
+        window.addEventListener("load", () => {
+          navigator.serviceWorker
+            .register("./sw.js")
+            .catch((e) => console.warn("SW register failed", e));
+        });
+      }
+
+      // ---------------- Data Dragon (icons) ----------------
+      const DDragon = { version: null, byName: new Map() };
+
+      const ICON_PLACEHOLDER =
+        "data:image/svg+xml;utf8," +
+        encodeURIComponent(
+          `<svg xmlns='http://www.w3.org/2000/svg' width='128' height='128'>
+            <defs><linearGradient id='g' x1='0' y1='0' x2='1' y2='1'>
+            <stop offset='0%' stop-color='#6ea8ff'/>
+            <stop offset='100%' stop-color='#b388ff'/></linearGradient></defs>
+            <rect width='100%' height='100%' fill='url(#g)'/>
+            <circle cx='64' cy='64' r='34' fill='rgba(0,0,0,0.25)'/>
+          </svg>`
+        );
+
+      const CHAMP_ICON_OVERRIDES = {
+        // Example: "Ambessa": "https://your.cdn/ambessa_square.png"
+      };
+
+      function normName(s) {
+        return (s || "")
+          .toLowerCase()
+          .replace(/[^a-z0-9]/gi, "")
+          .replace(/\s+/g, "");
+      }
+
+      async function ensureDDragon() {
+        if (DDragon.version && DDragon.byName.size) return;
+        try {
+          const vRes = await fetch(
+            "https://ddragon.leagueoflegends.com/api/versions.json"
+          );
+          const versions = await vRes.json();
+          DDragon.version = versions[0];
+
+          const cRes = await fetch(
+            `https://ddragon.leagueoflegends.com/cdn/${DDragon.version}/data/en_US/champion.json`
+          );
+          const data = await cRes.json();
+          const entries = Object.values(data.data || {});
+          for (const e of entries) {
+            const n = normName(e.name);
+            const file = e?.image?.full;
+            if (n && file) DDragon.byName.set(n, file);
+          }
+        } catch (e) {
+          console.warn("DDragon load failed", e);
+        }
+      }
+
+      function championIconUrl(championName) {
+        const override = CHAMP_ICON_OVERRIDES[championName];
+        if (override) return override;
+        const key = normName(championName);
+        const file = DDragon.byName.get(key);
+        if (!file || !DDragon.version) return ICON_PLACEHOLDER;
+        return `https://ddragon.leagueoflegends.com/cdn/${DDragon.version}/img/champion/${file}`;
+      }
+
+      // ---------------- Augments (verified names up to 6.2/6.2c) ----------------
+      // If you have more precise Codex text, import it via Data Manager.
+      const DEFAULT_AUGMENTS = [
+        { name: "Cool Down, Meow!", description: "Reduces the cooldowns of all projectile abilities.", tags: ["cdr","cdr_projectile","mage","poke"], patch: "6.2" },
+        { name: "Accelerated Control", description: "Greatly reduces the cooldowns of crowd control abilities.", tags: ["cdr","cc_cdr","control"], patch: "6.2" },
+        { name: "Eureka", description: "Gain Ability Haste based on your Attack Damage and Ability Power.", tags: ["cdr","scaling","hybrid"], patch: "6.2" },
+        { name: "Kinetic Cooldown", description: "Moving reduces your basic ability cooldowns.", tags: ["cdr","move","mobility"], patch: "6.2" },
+        { name: "Master of Mobility", description: "Massive Ability Haste for movement abilities; basic abilities are treated as movement abilities.", tags: ["cdr","mobility"], patch: "6.2" },
+        { name: "Dashing", description: "Reduces the cooldowns of movement abilities.", tags: ["cdr","mobility"], patch: "6.2" },
+
+        { name: "Ultimate Shield", description: "Gain Ultimate Ability Haste and a shield after casting your ultimate.", tags: ["ult_haste","shield","survivability"], patch: "6.2" },
+        { name: "Flashpoint", description: "Takedowns reduce your ultimate cooldown.", tags: ["ult_haste","reset","snowball"], patch: "6.2" },
+        { name: "Ascension", description: "Critical strikes reduce your ultimate ability's cooldown.", tags: ["crit","ult_haste"], patch: "6.2" },
+        { name: "Manaflow", description: "Restore a portion of max Mana on takedown.", tags: ["mana","poke","economy"], patch: "6.2" },
+
+        { name: "Bloodlust", description: "Gain omnivamp (heals from all damage).", tags: ["vamp","sustain"], patch: "6.2" },
+        { name: "Restless Restoration", description: "Moving restores Health over time.", tags: ["sustain","move"], patch: "6.2" },
+        { name: "Truce Shield", description: "Gain a shield upon leaving combat; scales with Adaptive Force.", tags: ["shield","survivability"], patch: "6.2" },
+        { name: "Melee Shield", description: "Gain a shield when you hit an enemy at close range.", tags: ["shield","bruiser","survivability"], patch: "6.2b" },
+        { name: "Heart of Steel", description: "Armor and Magic Resist per tick increased in 6.2c.", tags: ["tank","survivability"], patch: "6.2c" },
+
+        { name: "Infernal Conduit", description: "Your hits apply burn damage over time (% max Health).", tags: ["burn","dot","percent_hp"], patch: "6.2" },
+
+        { name: "Lion's Spellblade", description: "After hitting with an ability, your next attack summons a clone to attack.", tags: ["onhit","spellblade","hybrid"], patch: "6.2b" },
+        { name: "Spellblade Combo", description: "After using an ability, your next attack strikes twice.", tags: ["spellblade","onhit","hybrid"], patch: "6.2b" },
+        { name: "Combo Strike", description: "After using a movement ability, your next attack strikes twice.", tags: ["onhit","mobility","hybrid"], patch: "6.2b" },
+        { name: "Dual Strike", description: "Stores a portion of damage to release on‑hit.", tags: ["onhit","burst"], patch: "6.2b" },
+        { name: "Lord of Spellblade", description: "Basic attacks can reduce Spellblade cooldown.", tags: ["spellblade","onhit"], patch: "6.2b" },
+        { name: "Ethereal Weapon", description: "[Item] Abilities apply on‑hit effects.", tags: ["onhit","hybrid"], patch: "6.2" },
+
+        { name: "Health Marker", description: "Abilities mark enemies; attacking marked enemies restores Health.", tags: ["vamp","sustain","hybrid"], patch: "6.2b" },
+        { name: "Heartsong Blade", description: "After granting allies a bonus, your next attack deals more damage (buffed 6.2c).", tags: ["support","spellblade"], patch: "6.2/6.2c" },
+        { name: "Heartsong Corrosion", description: "Your heals deal damage over time and steal Heal/Shield Power.", tags: ["support","dot","anti_heal"], patch: "6.2" },
+        { name: "Heartsong Bolt", description: "Fires magic bolts scaling with Heal/Shield Power (Prismatic in 6.2c).", tags: ["support","dot","percent_hp"], patch: "6.2c" },
+        { name: "Transmissible Agents", description: "Your heals and shields are also granted to another teammate.", tags: ["support","teamwide","shield","heal"], patch: "6.2b" },
+
+        { name: "Movement Speed Enhancement", description: "Higher Movement Speed increases damage and Heal/Shield Power.", tags: ["ms_scaling","mobility"], patch: "6.2" },
+        { name: "Speed Thief", description: "Gain Movement Speed after slowing enemies (buffed 6.2c).", tags: ["mobility","slow"], patch: "6.2c" },
+
+        { name: "Kaboom, Meow!", description: "Build Energy by dealing damage. At full stacks, summon a bomb circle.", tags: ["aoe","circle","poke"], patch: "6.2/6.2b" },
+        { name: "Burn, Meow!", description: "Targets hit by your circles take damage over time.", tags: ["dot","burn","aoe"], patch: "6.2" },
+        { name: "Bounce, Meow!", description: "Your damaging effects can ricochet (nerfed 6.2c).", tags: ["aoe","chain"], patch: "6.2c" },
+
+        { name: "Cursed Blight", description: "On hit, slow targets and reduce their Attack Speed (nerfed 6.2c).", tags: ["utility","slow","anti_as"], patch: "6.2c" },
+        { name: "Lightning Equipment", description: "Adds a lightning slow on hit (nerfed 6.2c).", tags: ["utility","slow","item_synergy"], patch: "6.2c" },
+
+        { name: "Late-Game Carry", description: "Gold over time; bonus damage scales with total gold (tuned 6.2c).", tags: ["economy","scaling"], patch: "6.2c" },
+        { name: "Whale", description: "Shop purchase cooldown tweaks.", tags: ["economy","shop"], patch: "6.2b" },
+
+        { name: "Executioner", description: "Deal increased damage to low‑health enemies.", tags: ["execute","burst"], patch: "6.2b" },
+        { name: "Stroke of Luck", description: "Grants Critical Chance.", tags: ["crit","burst"], patch: "6.2b" },
+        { name: "Stack Assault", description: "Bonus damage per basic‑attack stack.", tags: ["stacking","dps"], patch: "6.2b" },
+        { name: "Stackosaurus Rex", description: "Effects stack much faster (available 6.2c).", tags: ["stacking","powerhouse"], patch: "6.2c" },
+
+        { name: "Leviathan", description: "Larger size grants higher damage (buffed 6.2b).", tags: ["size","scaling"], patch: "6.2b" },
+        { name: "Piercing Feathers", description: "Critical strikes fire missiles.", tags: ["crit","poke"], patch: "6.2" },
+        { name: "Plume Barrage", description: "Feather volley (Prismatic in 6.2c).", tags: ["poke","aoe"], patch: "6.2c" },
+        { name: "Diamond-Tipped Spear", description: "Feather/spear synergy.", tags: ["poke","crit"], patch: "6.2" },
+        { name: "Vulnerability", description: "Amplifies damage taken by enemies.", tags: ["amp","burst"], patch: "6.2" },
+
+        { name: "Moonlit Falcon Strike", description: "Triggers on champions only (6.2c).", tags: ["poke","champion_only"], patch: "6.2c" },
+
+        { name: "Starlight Cross", description: "Deal % of Mana as bonus magic damage (buffed 6.2b).", tags: ["mana","poke","amp"], patch: "6.2b" },
+
+        { name: "Tectonic Rift", description: "Burst AoE (tuned 6.2b).", tags: ["burst","aoe"], patch: "6.2b" },
+        { name: "Lupine Soul", description: "Scaling assassin damage (tuned 6.2b).", tags: ["burst","assassin"], patch: "6.2b" },
+        { name: "Soulhunter's Chain", description: "Gain stats per takedown.", tags: ["snowball","stacking"], patch: "6.2b" },
+        { name: "Master of Duality", description: "Duality stacks last longer.", tags: ["stacking","amp"], patch: "6.2b" },
+
+        { name: "Virtuous Cycle", description: "Assist/chain interaction (fixed 6.2c).", tags: ["utility"], patch: "6.2c" },
+
+        { name: "Ice Cold", description: "Removed in 6.2c.", tags: ["removed"], patch: "6.2c", removed: true }
+      ];
+
+      // ---------------- Champion roster + accurate weight model ----------------
+      // Approach:
+      // 1) Base weights from role(s)
+      // 2) Trait boosts per champion (projectiles, hard-CC, on-hit scaling, etc.)
+      // 3) Hand-tuned overrides for champs where ARAM/AAA meta strongly favors
+      //    certain augments (e.g., Lux projectile CDR, Gwen sustain/on-hit/burn).
+      const ROLE_WEIGHTS = {
+        mage: {
+          cdr_projectile: 2,
+          cdr: 2,
+          ult_haste: 2,
+          mana: 2,
+          burn: 2,
+          dot: 1,
+          shield: 1
+        },
+        assassin: {
+          cdr: 2,
+          ult_haste: 2,
+          execute: 2,
+          mobility: 2,
+          reset: 1,
+          amp: 1
+        },
+        marksman: {
+          onhit: 2,
+          crit: 2,
+          stacking: 1,
+          vamp: 2,
+          ms_scaling: 1,
+          burn: 1
+        },
+        fighter: {
+          vamp: 3,
+          sustain: 2,
+          cdr: 2,
+          onhit: 2,
+          mobility: 1,
+          ult_haste: 1
+        },
+        tank: {
+          shield: 2,
+          survivability: 3,
+          utility: 1,
+          slow: 1,
+          burn: 1
+        },
+        support: {
+          support: 3,
+          shield: 2,
+          heal: 2,
+          cc_cdr: 2,
+          mana: 1,
+          amp: 1
+        }
+      };
+
+      // Champion roles (complete through Aurora). Add or edit in Data Manager.
+      const CHAMP_ROLE_MAP = [
+        ["Aatrox", ["fighter"]],
+        ["Ahri", ["mage", "assassin"]],
+        ["Akali", ["assassin"]],
+        ["Akshan", ["marksman", "assassin"]],
+        ["Alistar", ["tank", "support"]],
+        ["Ambessa", ["fighter"]],
+        ["Amumu", ["tank"]],
+        ["Annie", ["mage"]],
+        ["Ashe", ["marksman"]],
+        ["Aurora", ["assassin", "mage"]],
+        ["Aurelion Sol", ["mage"]],
+        ["Bard", ["support"]],
+        ["Blitzcrank", ["tank", "support"]],
+        ["Brand", ["mage"]],
+        ["Braum", ["tank", "support"]],
+        ["Caitlyn", ["marksman"]],
+        ["Camille", ["fighter"]],
+        ["Corki", ["marksman"]],
+        ["Darius", ["fighter"]],
+        ["Diana", ["assassin", "mage"]],
+        ["Dr. Mundo", ["tank"]],
+        ["Draven", ["marksman"]],
+        ["Ekko", ["assassin"]],
+        ["Evelynn", ["assassin"]],
+        ["Ezreal", ["marksman"]],
+        ["Fiora", ["fighter"]],
+        ["Fizz", ["assassin"]],
+        ["Galio", ["tank", "mage"]],
+        ["Garen", ["fighter", "tank"]],
+        ["Gragas", ["mage", "tank"]],
+        ["Graves", ["marksman", "fighter"]],
+        ["Gwen", ["fighter"]],
+        ["Heimerdinger", ["mage"]],
+        ["Irelia", ["fighter"]],
+        ["Janna", ["support"]],
+        ["Jarvan IV", ["fighter", "tank"]],
+        ["Jax", ["fighter"]],
+        ["Jayce", ["fighter", "marksman"]],
+        ["Jhin", ["marksman"]],
+        ["Jinx", ["marksman"]],
+        ["Kai'Sa", ["marksman"]],
+        ["Karma", ["support", "mage"]],
+        ["Kassadin", ["assassin", "mage"]],
+        ["Katarina", ["assassin"]],
+        ["Kayle", ["fighter", "mage"]],
+        ["Kayn", ["assassin", "fighter"]],
+        ["Kennen", ["mage", "fighter"]],
+        ["Kha'Zix", ["assassin"]],
+        ["Kindred", ["marksman"]],
+        ["Lee Sin", ["fighter", "assassin"]],
+        ["Leona", ["tank", "support"]],
+        ["Lillia", ["fighter", "mage"]],
+        ["Lucian", ["marksman"]],
+        ["Lulu", ["support"]],
+        ["Lux", ["mage", "support"]],
+        ["Malphite", ["tank"]],
+        ["Master Yi", ["assassin", "fighter"]],
+        ["Miss Fortune", ["marksman"]],
+        ["Morgana", ["mage", "support"]],
+        ["Nami", ["support"]],
+        ["Nasus", ["fighter", "tank"]],
+        ["Neeko", ["mage"]],
+        ["Nilah", ["marksman"]],
+        ["Nunu & Willump", ["support", "tank"]],
+        ["Olaf", ["fighter"]],
+        ["Orianna", ["mage"]],
+        ["Ornn", ["tank", "support"]],
+        ["Pantheon", ["fighter"]],
+        ["Pyke", ["support", "assassin"]],
+        ["Rakan", ["support"]],
+        ["Rammus", ["tank"]],
+        ["Renekton", ["fighter"]],
+        ["Rengar", ["assassin"]],
+        ["Riven", ["fighter"]],
+        ["Rumble", ["mage", "fighter"]],
+        ["Ryze", ["mage"]],
+        ["Samira", ["marksman"]],
+        ["Senna", ["marksman", "support"]],
+        ["Seraphine", ["mage", "support"]],
+        ["Sett", ["fighter"]],
+        ["Shen", ["tank", "support"]],
+        ["Shyvana", ["fighter"]],
+        ["Singed", ["fighter"]],
+        ["Sion", ["tank"]],
+        ["Sona", ["support"]],
+        ["Soraka", ["support"]],
+        ["Swain", ["mage"]],
+        ["Sylas", ["assassin", "mage"]],
+        ["Syndra", ["mage"]],
+        ["Talon", ["assassin"]],
+        ["Teemo", ["marksman"]],
+        ["Thresh", ["support"]],
+        ["Tristana", ["marksman"]],
+        ["Tryndamere", ["fighter"]],
+        ["Twisted Fate", ["mage"]],
+        ["Urgot", ["fighter"]],
+        ["Varus", ["marksman"]],
+        ["Vayne", ["marksman"]],
+        ["Veigar", ["mage"]],
+        ["Vel'Koz", ["mage"]],
+        ["Vex", ["mage"]],
+        ["Vi", ["fighter"]],
+        ["Viego", ["assassin", "fighter"]],
+        ["Viktor", ["mage"]],
+        ["Vladimir", ["mage"]],
+        ["Volibear", ["fighter", "tank"]],
+        ["Warwick", ["fighter"]],
+        ["Wukong", ["fighter"]],
+        ["Xayah", ["marksman"]],
+        ["Xin Zhao", ["fighter"]],
+        ["Yasuo", ["fighter"]],
+        ["Yone", ["fighter", "assassin"]],
+        ["Yuumi", ["support"]],
+        ["Zed", ["assassin"]],
+        ["Zeri", ["marksman"]],
+        ["Ziggs", ["mage"]],
+        ["Zilean", ["support", "mage"]],
+        ["Zyra", ["mage", "support"]]
+      ];
+
+      // Trait boosts (fine-grained signal → tag weights)
+      const TRAIT_BOOSTS = {
+        projectileMage: { cdr_projectile: 2, cdr: 1, burn: 1 },
+        hardCC: { cc_cdr: 2, cdr: 1 },
+        ultCarry: { ult_haste: 3, cdr: 1 },
+        onHitScaling: { onhit: 3, vamp: 1 },
+        selfSustain: { vamp: 3, sustain: 2 },
+        mobilityDash: { mobility: 2, cdr: 1 },
+        aoePoke: { burn: 1, dot: 1, aoe: 1 },
+        supportShieldHeal: { support: 3, shield: 2, heal: 2 }
+      };
+
+      // Champion → traits (curated for accuracy of recommendations)
+      const CHAMP_TRAITS = {
+        Gwen: ["selfSustain", "onHitScaling", "mobilityDash"],
+        Lux: ["projectileMage", "hardCC", "ultCarry", "aoePoke"],
+        Ziggs: ["projectileMage", "aoePoke", "ultCarry"],
+        Veigar: ["projectileMage", "hardCC", "ultCarry"],
+        Ezreal: ["projectileMage", "onHitScaling", "mobilityDash"],
+        Vayne: ["onHitScaling", "mobilityDash"],
+        KaiS'a: ["onHitScaling", "mobilityDash"],
+        Jinx: ["onHitScaling"],
+        Katarina: ["mobilityDash", "ultCarry"],
+        Zed: ["mobilityDash", "ultCarry"],
+        Akali: ["mobilityDash", "ultCarry"],
+        Darius: ["selfSustain"],
+        Aatrox: ["selfSustain", "mobilityDash"],
+        Irelia: ["selfSustain", "mobilityDash"],
+        Sett: ["selfSustain"],
+        Amumu: ["hardCC", "ultCarry"],
+        Leona: ["hardCC", "ultCarry"],
+        Malphite: ["hardCC", "ultCarry"],
+        Lulu: ["supportShieldHeal"],
+        Janna: ["supportShieldHeal"],
+        Sona: ["supportShieldHeal"],
+        Soraka: ["supportShieldHeal"],
+        Seraphine: ["supportShieldHeal", "projectileMage", "aoePoke"],
+        Rakan: ["supportShieldHeal"],
+        Morgana: ["projectileMage", "hardCC"],
+        Orianna: ["projectileMage", "aoePoke", "ultCarry"],
+        Aurora: ["mobilityDash", "projectileMage", "ultCarry"],
+        Vel'Koz: ["projectileMage", "ultCarry", "aoePoke"],
+        Brand: ["aoePoke"],
+        Varus: ["projectileMage", "onHitScaling"],
+        Yasuo: ["onHitScaling", "mobilityDash"],
+        Yone: ["onHitScaling", "mobilityDash"],
+        Rammus: ["hardCC"],
+        Singed: ["selfSustain"],
+        Swain: ["aoePoke", "selfSustain"]
+      };
+
+      // Hand-tuned champion overrides where meta is very clear
+      const CHAMP_OVERRIDES = {
+        Lux: { cdr_projectile: 3, ult_haste: 3, burn: 2, mana: 2, cc_cdr: 2 },
+        Gwen: { vamp: 3, onhit: 2, burn: 2, cdr: 2, percent_hp: 2 },
+        Aurora: { mobility: 3, cdr: 2, burn: 2, vamp: 2, ms_scaling: 2 },
+        Ziggs: { cdr_projectile: 3, ult_haste: 3, burn: 2, mana: 2 },
+        Veigar: { cdr_projectile: 3, ult_haste: 3, cc_cdr: 2, burn: 2 },
+        Amumu: { cc_cdr: 3, ult_haste: 2, survivability: 2, shield: 1 },
+        Leona: { cc_cdr: 3, shield: 2, survivability: 2 },
+        Malphite: { ult_haste: 3, survivability: 2, cc_cdr: 2 }
+      };
+
+      function roleWeights(roles) {
+        const acc = {};
+        (roles || []).forEach((r) => {
+          const w = ROLE_WEIGHTS[r] || {};
+          Object.keys(w).forEach((k) => {
+            acc[k] = (acc[k] || 0) + w[k];
+          });
+        });
+        return acc;
+      }
+
+      function applyTraits(base, name) {
+        const traits = CHAMP_TRAITS[name] || [];
+        traits.forEach((t) => {
+          const boost = TRAIT_BOOSTS[t] || {};
+          Object.keys(boost).forEach((k) => {
+            base[k] = (base[k] || 0) + boost[k];
+          });
+        });
+        return base;
+      }
+
+      function applyOverrides(base, name) {
+        const o = CHAMP_OVERRIDES[name];
+        if (!o) return base;
+        Object.keys(o).forEach((k) => {
+          base[k] = (base[k] || 0) + o[k];
+        });
+        return base;
+      }
+
+      function makeChampion(name, roles) {
+        const base = roleWeights(roles);
+        applyTraits(base, name);
+        applyOverrides(base, name);
+        return {
+          summary:
+            roles.join(" / ") + " • Weights tuned for AAA ARAM (6.2/6.2c).",
+          weights: base
+        };
+      }
+
+      const DEFAULT_CHAMPIONS = CHAMP_ROLE_MAP.reduce((obj, [n, r]) => {
+        obj[n] = makeChampion(n, r);
+        return obj;
+      }, {});
+
+      // ---------------- Synergy model (post‑pick bonuses) ----------------
+      const SYNERGY = {
+        cdr: { ult_haste: 0.75, mana: 0.4, cdr: 0.35 },
+        cdr_projectile: { cdr: 0.5, ult_haste: 0.8 },
+        cc_cdr: { cdr: 0.35, ult_haste: 0.4 },
+        ult_haste: { cdr: 0.6, mana: 0.3 },
+        vamp: { burn: 0.6, sustain: 0.5 },
+        sustain: { vamp: 0.5, shield: 0.3 },
+        burn: { vamp: 0.4, dot: 0.5, percent_hp: 0.4 },
+        onhit: { slow: 0.3, vamp: 0.4, mobility: 0.2 },
+        mobility: { ms_scaling: 0.8, cdr: 0.25 },
+        ms_scaling: { mobility: 0.8 },
+        shield: { sustain: 0.3 },
+        crit: { ult_haste: 0.3 },
+        aoe: { burn: 0.4, circle: 0.3 },
+        economy: { scaling: 0.5 },
+        stacking: { amp: 0.25 }
+      };
+
+      // ---------------- Persistence ----------------
+      const LS_AUG = "wr_aug_db_v62c";
+      const LS_CHAMP = "wr_champ_db_v62c";
+      const loadJson = (k, f) => {
+        try {
+          const raw = localStorage.getItem(k);
+          return raw ? JSON.parse(raw) : f;
+        } catch {
+          return f;
+        }
+      };
+      const saveJson = (k, v) => localStorage.setItem(k, JSON.stringify(v));
+      let AUGMENTS = loadJson(LS_AUG, DEFAULT_AUGMENTS);
+      let CHAMPS = loadJson(LS_CHAMP, DEFAULT_CHAMPIONS);
+
+      // ---------------- State ----------------
+      let currentChamp = "Aurora";
+      if (!CHAMPS[currentChamp]) currentChamp = Object.keys(CHAMPS)[0];
+      let picks = [];
+
+      // ---------------- DOM ----------------
+      const champInput = document.getElementById("champInput");
+      const suggest = document.getElementById("suggest");
+      const champInfo = document.getElementById("champInfo");
+      const picked = document.getElementById("picked");
+      const augGrid = document.getElementById("augGrid");
+      const recs = document.getElementById("recs");
+      const search = document.getElementById("search");
+      const txtAug = document.getElementById("txtAug");
+      const txtChamp = document.getElementById("txtChamp");
+
+      // ---------------- Typeahead ----------------
+      function championRolesText(name) {
+        const def = CHAMP_ROLE_MAP.find(([n]) => n === name);
+        return def ? def[1].join(" / ") : "";
+      }
+
+      function renderChampInfo() {
+        const info = CHAMPS[currentChamp];
+        const weights = info.weights || {};
+        const tops = Object.entries(weights)
+          .sort((a, b) => b[1] - a[1])
+          .slice(0, 6)
+          .map((x) => x[0]);
+        champInfo.innerHTML =
+          `<span style="display:inline-flex;align-items:center;gap:10px">` +
+          `<img src="${championIconUrl(
+            currentChamp
+          )}" alt="" class="icon" style="width:40px;height:40px"/>` +
+          `<strong>${currentChamp}</strong>` +
+          `</span><br/>${CHAMPS[currentChamp].summary}` +
+          `<div style="margin-top:6px">${tops
+            .map((t) => `<span class='chip'>${t}</span>`)
+            .join(" ")}</div>`;
+      }
+
+      function showSuggestions(list, highlightIdx = 0) {
+        suggest.innerHTML = "";
+        if (!list.length) {
+          suggest.style.display = "none";
+          return;
+        }
+        list.forEach((name, idx) => {
+          const div = document.createElement("div");
+          div.className = "s-item" + (idx === highlightIdx ? " active" : "");
+          div.innerHTML =
+            `<img class="icon" src="${championIconUrl(name)}" alt="" />` +
+            `<div class="name">${name}</div>` +
+            `<div class="roles">${championRolesText(name)}</div>`;
+          div.onclick = () => {
+            currentChamp = name;
+            picks = [];
+            champInput.value = name;
+            suggest.style.display = "none";
+            renderAll();
+          };
+          suggest.appendChild(div);
+        });
+        suggest.style.display = "block";
+      }
+
+      function searchChampions(q) {
+        const names = Object.keys(CHAMPS);
+        const s = (q || "").trim().toLowerCase();
+        if (!s) return [];
+        return names
+          .filter((n) => n.toLowerCase().includes(s))
+          .sort((a, b) => a.localeCompare(b))
+          .slice(0, 12);
+      }
+
+      champInput.addEventListener("input", () => {
+        const q = champInput.value;
+        const res = searchChampions(q);
+        showSuggestions(res);
+      });
+      champInput.addEventListener("focus", () => {
+        const q = champInput.value;
+        const res = searchChampions(q);
+        showSuggestions(res);
+      });
+      document.addEventListener("click", (e) => {
+        if (!suggest.contains(e.target) && e.target !== champInput) {
+          suggest.style.display = "none";
+        }
+      });
+
+      // ---------------- Recommendation engine ----------------
+      function scoreAugForChamp(aug, champ) {
+        const weights = (CHAMPS[champ] && CHAMPS[champ].weights) || {};
+        return (aug.tags || []).reduce(
+          (s, tag) => s + (Number(weights[tag]) || 0),
+          0
+        );
+      }
+      function synergyBonus(aug, picksArr) {
+        const tags = aug.tags || [];
+        let total = 0;
+        picksArr.forEach((p) => {
+          (p.tags || []).forEach((t) => {
+            const map = SYNERGY[t];
+            if (!map) return;
+            tags.forEach((nt) => {
+              total += Number(map[nt] || 0);
+            });
+          });
+        });
+        // small diminishing return so a single tag doesn't dominate
+        return total * (1 - 0.08 * Math.max(0, picksArr.length - 1));
+      }
+      function rankedPool(champ, picksArr, pool) {
+        const rem = pool.filter(
+          (a) => !a.removed && !picksArr.find((p) => p.name === a.name)
+        );
+        return rem
+          .map((a) => {
+            const c = scoreAugForChamp(a, champ);
+            const syn = synergyBonus(a, picksArr);
+            return { aug: a, champ: c, syn, score: c + syn };
+          })
+          .sort((x, y) => y.score - x.score);
+      }
+
+      function makeTile(aug, onClick, meta) {
+        const t = document.createElement("div");
+        t.className = "tile";
+        t.onclick = onClick;
+        t.innerHTML =
+          `<h4>${aug.name}${
+            aug.removed ? " <span class='danger'>(Removed)</span>" : ""
+          }</h4>` +
+          `<p>${aug.description || ""}</p>` +
+          (meta
+            ? `<p class='hint'>score ${meta.score.toFixed(
+                2
+              )} • champ +${meta.champ.toFixed(2)} • syn +${meta.syn.toFixed(
+                2
+              )}</p>`
+            : "");
+        return t;
+      }
+
+      function renderPicked() {
+        picked.innerHTML = "";
+        picks.forEach((p) => {
+          const c = document.createElement("span");
+          c.className = "chip sel";
+          c.textContent = p.name;
+          picked.appendChild(c);
+        });
+      }
+      function renderAugList() {
+        const q = search.value.trim().toLowerCase();
+        const ranked = rankedPool(currentChamp, picks, AUGMENTS);
+        const filtered = ranked.filter((r) => {
+          const a = r.aug;
+          if (!q) return true;
+          return (
+            a.name.toLowerCase().includes(q) ||
+            (a.description || "").toLowerCase().includes(q) ||
+            (a.tags || []).join(" ").toLowerCase().includes(q)
+          );
+        });
+        augGrid.innerHTML = "";
+        filtered.forEach((r) =>
+          augGrid.appendChild(makeTile(r.aug, () => pick(r.aug), r))
+        );
+      }
+      function renderRecs() {
+        const list = rankedPool(currentChamp, picks, AUGMENTS).slice(0, 8);
+        recs.innerHTML = "";
+        list.forEach((r) =>
+          recs.appendChild(makeTile(r.aug, () => pick(r.aug), r))
+        );
+      }
+      function renderAll() {
+        renderChampInfo();
+        renderPicked();
+        renderAugList();
+        renderRecs();
+      }
+      function pick(aug) {
+        if (picks.length >= 5) return;
+        picks.push(aug);
+        renderAll();
+      }
+
+      // ---------------- Controls ----------------
+      document.getElementById("btnReset").onclick = () => {
+        picks = [];
+        renderAll();
+      };
+      document.getElementById("btnUndo").onclick = () => {
+        picks.pop();
+        renderAll();
+      };
+      document.getElementById("btnData").onclick = () => {
+        const d = document.querySelector("details.panel");
+        d.open = true;
+        d.scrollIntoView({ behavior: "smooth", block: "start" });
+      };
+      document.getElementById("btnShare").onclick = async () => {
+        try {
+          if (navigator.share) {
+            await navigator.share({
+              title: "ARAM Augment Advisor",
+              text: "Best next augments for Wild Rift AAA ARAM",
+              url: location.href
+            });
+          } else {
+            await navigator.clipboard.writeText(location.href);
+            alert("Link copied to clipboard!");
+          }
+        } catch {}
+      };
+      search.oninput = renderAugList;
+
+      // Data Manager
+      document.getElementById("btnAugExport").onclick = () => {
+        txtAug.value = JSON.stringify(AUGMENTS, null, 2);
+        txtAug.focus();
+      };
+      document.getElementById("btnAugImport").onclick = () => {
+        try {
+          const data = JSON.parse(txtAug.value);
+          if (!Array.isArray(data)) throw new Error("Expected an array");
+          AUGMENTS = data;
+          saveJson(LS_AUG, AUGMENTS);
+          alert("Augments imported.");
+          renderAll();
+        } catch (e) {
+          alert("Import failed: " + e.message);
+        }
+      };
+      document.getElementById("btnAugReset").onclick = () => {
+        AUGMENTS = DEFAULT_AUGMENTS;
+        saveJson(LS_AUG, AUGMENTS);
+        alert("Augments reset.");
+        renderAll();
+      };
+      document.getElementById("btnChampExport").onclick = () => {
+        txtChamp.value = JSON.stringify(CHAMPS, null, 2);
+        txtChamp.focus();
+      };
+      document.getElementById("btnChampImport").onclick = () => {
+        try {
+          const data = JSON.parse(txtChamp.value);
+          CHAMPS = data;
+          saveJson(LS_CHAMP, CHAMPS);
+          if (!CHAMPS[currentChamp]) {
+            currentChamp = Object.keys(CHAMPS)[0];
+          }
+          picks = [];
+          alert("Champions imported.");
+          renderAll();
+        } catch (e) {
+          alert("Import failed: " + e.message);
+        }
+      };
+      document.getElementById("btnChampReset").onclick = () => {
+        CHAMPS = DEFAULT_CHAMPIONS;
+        saveJson(LS_CHAMP, CHAMPS);
+        currentChamp = "Aurora";
+        if (!CHAMPS[currentChamp]) currentChamp = Object.keys(CHAMPS)[0];
+        picks = [];
+        alert("Champions reset to defaults.");
+        renderAll();
+      };
+
+      // ---------------- Boot ----------------
+      (async function init() {
+        await ensureDDragon(); // icons
+        txtAug.value = JSON.stringify(AUGMENTS, null, 2);
+        txtChamp.value = JSON.stringify(CHAMPS, null, 2);
+        champInput.value = currentChamp;
+        renderAll();
+      })();
+    </script>
+  </body>
+</html>
