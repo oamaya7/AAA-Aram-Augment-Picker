@@ -6,7 +6,7 @@
      * ddragon icons: cache-first (revalidate in background)
 */
 
-const SW_VERSION = "v1.0.3";
+const SW_VERSION = "v1.0.4";
 const SHELL_CACHE = `shell-${SW_VERSION}`;
 const DDRAGON_CACHE = `ddragon-${SW_VERSION}`;
 
